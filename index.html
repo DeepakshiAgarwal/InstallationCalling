@@ -1,0 +1,798 @@
+<title>Escalation Queue Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F2F5F7;
+    --surface:#FFFFFF;
+    --surface-2:#EAEFF2;
+    --surface-3:#DFE6EA;
+    --ink:#12202B;
+    --ink-2:#45596A;
+    --muted:#7C8B96;
+    --border:#D7DEE3;
+    --accent:#0E7C86;
+    --accent-ink:#FFFFFF;
+    --accent-soft:#E3F1F1;
+
+    --st-pending:#BE6A1D;
+    --st-pending-bg:#FBEBDA;
+    --st-progress:#2E6CA4;
+    --st-progress-bg:#E3EDF6;
+    --st-noanswer:#A8433B;
+    --st-noanswer-bg:#F6E4E2;
+    --st-connected:#1D8452;
+    --st-connected-bg:#E1F3E8;
+    --st-hold:#8B8478;
+    --st-hold-bg:#EDEAE4;
+
+    --font-ui: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0B1420;
+      --surface:#101F2C;
+      --surface-2:#152838;
+      --surface-3:#1E3548;
+      --ink:#E7EEF2;
+      --ink-2:#B7C6D0;
+      --muted:#7E93A0;
+      --border:#223447;
+      --accent:#49BEC4;
+      --accent-ink:#06232A;
+      --accent-soft:#123138;
+
+      --st-pending:#E0964B;
+      --st-pending-bg:#2E2013;
+      --st-progress:#6FA9DA;
+      --st-progress-bg:#132433;
+      --st-noanswer:#E08078;
+      --st-noanswer-bg:#301C1A;
+      --st-connected:#5FCB8E;
+      --st-connected-bg:#132A1F;
+      --st-hold:#A6A08F;
+      --st-hold-bg:#26241D;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0B1420;
+    --surface:#101F2C;
+    --surface-2:#152838;
+    --surface-3:#1E3548;
+    --ink:#E7EEF2;
+    --ink-2:#B7C6D0;
+    --muted:#7E93A0;
+    --border:#223447;
+    --accent:#49BEC4;
+    --accent-ink:#06232A;
+    --accent-soft:#123138;
+
+    --st-pending:#E0964B;
+    --st-pending-bg:#2E2013;
+    --st-progress:#6FA9DA;
+    --st-progress-bg:#132433;
+    --st-noanswer:#E08078;
+    --st-noanswer-bg:#301C1A;
+    --st-connected:#5FCB8E;
+    --st-connected-bg:#132A1F;
+    --st-hold:#A6A08F;
+    --st-hold-bg:#26241D;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-ui);
+    -webkit-font-smoothing:antialiased;
+    text-wrap:pretty;
+  }
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:32px 24px 80px;
+    display:flex;
+    flex-direction:column;
+    gap:24px;
+  }
+
+  header{ display:flex; flex-direction:column; gap:14px; }
+  .eyebrow{
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--accent); font-weight:600;
+  }
+  h1{
+    font-size:clamp(26px,3vw,34px); line-height:1.15; margin:0;
+    font-weight:700; text-wrap:balance; letter-spacing:-0.01em;
+  }
+  .subhead{ color:var(--ink-2); font-size:15px; max-width:660px; line-height:1.5; margin:0; }
+  .meta-row{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  .pill{
+    display:inline-flex; align-items:center; gap:6px; font-family:var(--font-mono);
+    font-size:12.5px; padding:5px 11px; border-radius:100px; background:var(--surface-2);
+    border:1px solid var(--border); color:var(--ink-2);
+  }
+  .pill .dot{ width:6px;height:6px;border-radius:50%; background:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+  .note{
+    background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent);
+    border-radius:8px; padding:14px 16px; font-size:13.5px; color:var(--ink-2); line-height:1.55; max-width:940px;
+  }
+  .note b{color:var(--ink);}
+
+  .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .kpi{
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:16px 18px; display:flex; flex-direction:column; gap:6px; min-width:0;
+  }
+  .kpi .k-label{ font-size:12.5px; color:var(--muted); font-weight:600; letter-spacing:.01em; }
+  .kpi .k-value{ font-family:var(--font-mono); font-size:30px; font-weight:600; letter-spacing:-0.02em; font-variant-numeric:tabular-nums; }
+  .kpi .k-sub{ font-size:12.5px; color:var(--ink-2); font-variant-numeric:tabular-nums; }
+
+  /* ---------- tab bar ---------- */
+  .tabbar{ display:flex; gap:4px; background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:4px; }
+  .tabbtn{
+    flex:1; appearance:none; border:none; background:transparent; color:var(--ink-2);
+    font-family:var(--font-ui); font-size:13.5px; font-weight:600; padding:10px 12px;
+    border-radius:9px; cursor:pointer; text-align:center; transition:background .15s, color .15s;
+  }
+  .tabbtn .n{ font-family:var(--font-mono); font-weight:600; font-variant-numeric:tabular-nums; margin-left:6px; color:var(--muted); }
+  .tabbtn:hover{ background:var(--surface); color:var(--ink); }
+  .tabbtn.active{ background:var(--accent); color:var(--accent-ink); }
+  .tabbtn.active .n{ color:var(--accent-ink); opacity:.85; }
+  .tabbtn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  .tabpanel{ display:none; flex-direction:column; gap:22px; }
+  .tabpanel.active{ display:flex; }
+
+  .panel{ background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+  .panel-head{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:16px;
+    padding:20px 22px 16px; border-bottom:1px solid var(--border);
+  }
+  .panel-head h2{ margin:0 0 4px; font-size:18px; font-weight:700; letter-spacing:-0.01em; }
+  .panel-head p{ margin:0; font-size:13px; color:var(--muted); max-width:560px; line-height:1.5; }
+  .panel-badge{ flex-shrink:0; text-align:right; }
+  .panel-badge .num{ font-family:var(--font-mono); font-size:26px; font-weight:600; line-height:1; font-variant-numeric:tabular-nums; }
+  .panel-badge .lbl{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; font-weight:600; }
+  .panel-body{ padding:20px 22px 24px; display:flex; flex-direction:column; gap:22px; }
+
+  .row-2{ display:grid; grid-template-columns:1.1fr 1fr; gap:24px; }
+  .row-2-even{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+
+  .block-label{
+    font-size:11.5px; font-weight:600; text-transform:uppercase; letter-spacing:.07em;
+    color:var(--muted); margin:0 0 12px;
+  }
+
+  .daybars{ display:flex; align-items:flex-end; gap:14px; height:130px; padding:0 4px; }
+  .daybar-col{ display:flex; flex-direction:column; align-items:center; gap:8px; flex:1; height:100%; justify-content:flex-end; }
+  .daybar-track{ width:100%; max-width:56px; height:100%; display:flex; align-items:flex-end; position:relative; }
+  .daybar-fill{
+    width:100%; background:var(--accent); border-radius:5px 5px 3px 3px; min-height:4px;
+    position:relative; transition:opacity .15s;
+  }
+  .daybar-fill:hover{opacity:.82;}
+  .daybar-fill .val{ position:absolute; top:-34px; left:0; right:0; text-align:center; }
+  .daybar-fill .val .n{ font-family:var(--font-mono); font-size:12.5px; font-weight:600; color:var(--ink); display:block; }
+  .daybar-fill .val .p{ font-family:var(--font-mono); font-size:10.5px; color:var(--muted); display:block; }
+  .daybar-col .day-lbl{ font-size:11.5px; color:var(--ink-2); font-weight:500; }
+
+  .stacked{ display:flex; height:14px; border-radius:7px; overflow:hidden; background:var(--surface-3); }
+  .stacked > div{height:100%;}
+  .split-legend{ display:flex; gap:16px; margin-top:10px; flex-wrap:wrap; }
+  .split-legend .item{ display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--ink-2); }
+  .split-legend .sw{ width:9px;height:9px;border-radius:2px;flex-shrink:0; }
+  .split-legend .item b{ color:var(--ink); font-family:var(--font-mono); font-variant-numeric:tabular-nums; }
+  .split-legend .item .pct{ color:var(--muted); font-family:var(--font-mono); font-variant-numeric:tabular-nums; }
+
+  .funnel{
+    background:var(--surface-2); border:1px solid var(--border); border-radius:10px;
+    padding:16px 16px 14px; display:flex; flex-direction:column; gap:14px;
+  }
+  .funnel-top{ display:flex; justify-content:space-between; align-items:baseline; }
+  .funnel-top .who{ font-size:12.5px; font-weight:700; letter-spacing:.03em; text-transform:uppercase; color:var(--ink); }
+  .funnel-top .who span{ color:var(--muted); font-weight:500; text-transform:none; letter-spacing:0; }
+  .connected-stat{ display:flex; align-items:baseline; gap:8px; }
+  .connected-stat .pct{ font-family:var(--font-mono); font-size:28px; font-weight:600; color:var(--st-connected); font-variant-numeric:tabular-nums; }
+  .connected-stat .pct.zero{ color:var(--muted); }
+  .connected-stat .pct-lbl{ font-size:12px; color:var(--muted); }
+  .progress-track{ height:6px; border-radius:4px; background:var(--surface-3); overflow:hidden; }
+  .progress-fill{ height:100%; background:var(--st-connected); border-radius:4px; }
+
+  .disp-list{ display:flex; flex-direction:column; gap:8px; }
+  .disp-row{ display:grid; grid-template-columns:112px 1fr 74px; align-items:center; gap:10px; font-size:12.5px; }
+  .disp-row .d-name{ color:var(--ink-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .disp-row .d-track{ height:9px; border-radius:5px; background:var(--surface-3); overflow:hidden; }
+  .disp-row .d-fill{ height:100%; border-radius:5px; transition:opacity .15s; }
+  .disp-row .d-fill:hover{opacity:.8;}
+  .disp-row .d-num{ font-family:var(--font-mono); text-align:right; color:var(--ink); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .disp-row .d-num .pct{ color:var(--muted); }
+
+  .status-note{
+    display:flex; gap:8px; align-items:flex-start; font-size:12.5px; color:var(--ink-2);
+    background:var(--accent-soft); border-radius:8px; padding:10px 12px; line-height:1.5;
+  }
+  .status-note .tag{ font-family:var(--font-mono); font-weight:600; color:var(--accent); flex-shrink:0; }
+
+  .conv-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .conv-table{ width:100%; border-collapse:collapse; font-size:13px; }
+  .conv-table caption{
+    text-align:left; font-size:11.5px; font-weight:600; text-transform:uppercase;
+    letter-spacing:.06em; color:var(--muted); padding-bottom:8px;
+  }
+  .conv-table th{ text-align:left; font-size:11.5px; color:var(--muted); font-weight:600; padding:6px 8px; border-bottom:1px solid var(--border); }
+  .conv-table th.num, .conv-table td.num{ text-align:right; font-variant-numeric:tabular-nums; }
+  .conv-table td{
+    padding:9px 8px; border-bottom:1px solid var(--border); font-family:var(--font-mono);
+    color:var(--ink); font-variant-numeric:tabular-nums;
+  }
+  .conv-table td.label{ font-family:var(--font-ui); font-weight:500; color:var(--ink-2); }
+  .conv-table td.label .sub{ display:block; font-size:10.5px; color:var(--muted); font-weight:400; margin-top:1px; }
+  .conv-table tr:last-child td{ border-bottom:none; }
+  .conv-table .donepct{ font-weight:700; }
+  .donepct.hi{ color:var(--st-connected); }
+  .donepct.mid{ color:var(--st-progress); }
+  .donepct.lo{ color:var(--st-noanswer); }
+  .donepct.na{ color:var(--muted); font-weight:500; }
+  .conv-bar-cell{ min-width:90px; }
+  .conv-bar-track{ height:8px; border-radius:4px; background:var(--surface-3); overflow:hidden; }
+  .conv-bar-fill{ height:100%; border-radius:4px; background:var(--st-connected); }
+
+  .trend-table{ width:100%; border-collapse:collapse; font-size:13px; }
+  .trend-table th{ text-align:left; font-size:11.5px; color:var(--muted); font-weight:600; padding:7px 10px; border-bottom:1px solid var(--border); }
+  .trend-table th.num, .trend-table td.num{ text-align:right; }
+  .trend-table td{
+    padding:9px 10px; border-bottom:1px solid var(--border); font-family:var(--font-mono);
+    color:var(--ink); font-variant-numeric:tabular-nums;
+  }
+  .trend-table td.date{ font-family:var(--font-ui); font-weight:500; color:var(--ink-2); }
+  .trend-table tr:last-child td{ border-bottom:none; }
+  .trend-table tr.thin td{ color:var(--muted); }
+
+  footer{ color:var(--muted); font-size:12px; text-align:center; padding-top:8px; }
+
+  @media (max-width:860px){
+    .kpi-grid{grid-template-columns:repeat(2,1fr);}
+    .row-2, .row-2-even, .conv-grid{grid-template-columns:1fr;}
+    .tabbar{ flex-wrap:wrap; }
+    .tabbtn{ flex:1 1 45%; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">B2I · Escalation Workstream</div>
+    <h1>Escalation Queue Console</h1>
+    <p class="subhead">Full picture across the four call queues — leads by day, how each queue resolves, how far CSP and customer calls got, and how much each outcome actually predicts closing the job.</p>
+    <div class="meta-row">
+      <span class="pill"><span class="dot"></span>Refreshed 29 Sep 2026 · filters cleared for this pull</span>
+      <span class="pill">Source: B2I Escalation Workstream sheet</span>
+      <span class="pill">557 real escalations (practice rows excluded)</span>
+    </div>
+    <div class="note">
+      <b>Live sheet, moving target:</b> this pulls the true underlying data with the shared Basic Filter off, excluding "Practice row" dummy entries. Your team is actively working the queue in real time, so re-pulling minutes apart gives different totals — this snapshot is from just now. <b>Heads up:</b> filters are still off on all four tabs; reapply your usual view when you're done here.
+    </div>
+  </header>
+
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="k-label">After Assignment</div>
+      <div class="k-value">155</div>
+      <div class="k-sub">28% CSP · 28% CX connected</div>
+    </div>
+    <div class="kpi">
+      <div class="k-label">Visit Day</div>
+      <div class="k-value">171</div>
+      <div class="k-sub">32% CSP · 32% CX connected</div>
+    </div>
+    <div class="kpi">
+      <div class="k-label">Missed Visit</div>
+      <div class="k-value">162</div>
+      <div class="k-sub">22% CSP · 14% CX connected</div>
+    </div>
+    <div class="kpi">
+      <div class="k-label">After Arrival</div>
+      <div class="k-value">69</div>
+      <div class="k-sub">25% CSP · 4% CX connected</div>
+    </div>
+  </div>
+
+  <div class="tabbar" role="tablist">
+    <button class="tabbtn active" data-tab="t1" role="tab" aria-selected="true">1 · After Assignment<span class="n">155</span></button>
+    <button class="tabbtn" data-tab="t2" role="tab" aria-selected="false">2 · Visit Day<span class="n">171</span></button>
+    <button class="tabbtn" data-tab="t3" role="tab" aria-selected="false">3 · Missed Visit<span class="n">162</span></button>
+    <button class="tabbtn" data-tab="t4" role="tab" aria-selected="false">4 · After Arrival<span class="n">69</span></button>
+  </div>
+
+  <!-- ================= TAB 1: AFTER ASSIGNMENT ================= -->
+  <div class="tabpanel active" id="t1">
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>1 · After Assignment — 2 Hours</h2>
+          <p>Technician assigned 3+ working hours ago and the CSP still hasn't called the customer. Goal: CSP calls and fixes a time.</p>
+        </div>
+        <div class="panel-badge"><div class="num">155</div><div class="lbl">leads</div></div>
+      </div>
+      <div class="panel-body">
+        <div class="row-2">
+          <div>
+            <div class="block-label">Leads by day</div>
+            <div class="daybars">
+              <div class="daybar-col"><div class="daybar-track"><div class="daybar-fill" style="height:100%;background:var(--accent);"><span class="val"><span class="n">51</span><span class="p">32.9%</span></span></div></div><div class="day-lbl">26 Sep</div></div>
+              <div class="daybar-col"><div class="daybar-track"><div class="daybar-fill" style="height:88.2%;background:var(--accent);"><span class="val"><span class="n">45</span><span class="p">29.0%</span></span></div></div><div class="day-lbl">27 Sep</div></div>
+              <div class="daybar-col"><div class="daybar-track"><div class="daybar-fill" style="height:58.8%;background:var(--accent);"><span class="val"><span class="n">30</span><span class="p">19.4%</span></span></div></div><div class="day-lbl">28 Sep</div></div>
+              <div class="daybar-col"><div class="daybar-track"><div class="daybar-fill" style="height:56.9%;background:var(--st-pending);"><span class="val"><span class="n">29</span><span class="p">18.7%</span></span></div></div><div class="day-lbl">29 Sep</div></div>
+            </div>
+          </div>
+          <div>
+            <div class="block-label">Status mix</div>
+            <div class="stacked">
+              <div style="width:45.8%;background:var(--st-connected);"></div>
+              <div style="width:32.9%;background:var(--st-progress);"></div>
+              <div style="width:10.3%;background:var(--st-pending);"></div>
+              <div style="width:11.0%;background:var(--st-hold);"></div>
+            </div>
+            <div class="split-legend">
+              <div class="item"><span class="sw" style="background:var(--st-connected);"></span>Done <b>71</b> <span class="pct">45.8%</span></div>
+              <div class="item"><span class="sw" style="background:var(--st-progress);"></span>Carried over <b>51</b> <span class="pct">32.9%</span></div>
+              <div class="item"><span class="sw" style="background:var(--st-pending);"></span>Call now <b>16</b> <span class="pct">10.3%</span></div>
+              <div class="item"><span class="sw" style="background:var(--st-hold);"></span>Hold <b>17</b> <span class="pct">11.0%</span></div>
+            </div>
+            <div class="status-note" style="margin-top:14px;">
+              <span class="tag">FYI</span>
+              <span>46% of leads reach "Done" — the rest are still cycling through the queue day to day.</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="block-label">Day-by-day trend</div>
+          <table class="trend-table">
+            <thead><tr><th>Date</th><th class="num">Leads</th><th class="num">Done %</th><th class="num">CSP connected %</th><th class="num">CX connected %</th></tr></thead>
+            <tbody>
+              <tr><td class="date">26 Sep</td><td class="num">51</td><td class="num">64.7%</td><td class="num">31.4%</td><td class="num">37.3%</td></tr>
+              <tr><td class="date">27 Sep</td><td class="num">45</td><td class="num">57.8%</td><td class="num">35.6%</td><td class="num">33.3%</td></tr>
+              <tr><td class="date">28 Sep</td><td class="num">30</td><td class="num">30.0%</td><td class="num">13.3%</td><td class="num">26.7%</td></tr>
+              <tr class="thin"><td class="date">29 Sep</td><td class="num">29</td><td class="num">10.3%</td><td class="num">24.1%</td><td class="num">3.4%</td></tr>
+            </tbody>
+          </table>
+          <div class="status-note" style="margin-top:12px;">
+            <span class="tag">Read</span>
+            <span>Connect rate and Done % both slide from 26→28 Sep — worth a look at whether that's staffing or backlog build-up. 29 Sep is today's leads (still early); read that row as in-progress, not a further drop.</span>
+          </div>
+        </div>
+
+        <div class="row-2-even">
+          <div class="funnel">
+            <div class="funnel-top"><div class="who">CSP calls <span>(1st leg)</span></div></div>
+            <div class="connected-stat"><span class="pct">28%</span><span class="pct-lbl">connected · 43 / 155</span></div>
+            <div class="progress-track"><div class="progress-fill" style="width:28%;"></div></div>
+            <div class="disp-list">
+              <div class="disp-row"><span class="d-name">No answer</span><span class="d-track"><span class="d-fill" style="width:40.6%;background:var(--st-noanswer);"></span></span><span class="d-num">63 <span class="pct">40.6%</span></span></div>
+              <div class="disp-row"><span class="d-name">Not called</span><span class="d-track"><span class="d-fill" style="width:28.4%;background:var(--st-pending);"></span></span><span class="d-num">44 <span class="pct">28.4%</span></span></div>
+              <div class="disp-row"><span class="d-name">Spoke</span><span class="d-track"><span class="d-fill" style="width:27.7%;background:var(--st-connected);"></span></span><span class="d-num">43 <span class="pct">27.7%</span></span></div>
+              <div class="disp-row"><span class="d-name">Busy – call back</span><span class="d-track"><span class="d-fill" style="width:3.2%;background:var(--st-progress);"></span></span><span class="d-num">5 <span class="pct">3.2%</span></span></div>
+            </div>
+          </div>
+          <div class="funnel">
+            <div class="funnel-top"><div class="who">Customer calls <span>(CX leg)</span></div></div>
+            <div class="connected-stat"><span class="pct">28%</span><span class="pct-lbl">connected · 43 / 155</span></div>
+            <div class="progress-track"><div class="progress-fill" style="width:28%;"></div></div>
+            <div class="disp-list">
+              <div class="disp-row"><span class="d-name">Not called</span><span class="d-track"><span class="d-fill" style="width:38.1%;background:var(--st-pending);"></span></span><span class="d-num">59 <span class="pct">38.1%</span></span></div>
+              <div class="disp-row"><span class="d-name">No answer</span><span class="d-track"><span class="d-fill" style="width:34.2%;background:var(--st-noanswer);"></span></span><span class="d-num">53 <span class="pct">34.2%</span></span></div>
+              <div class="disp-row"><span class="d-name">Spoke</span><span class="d-track"><span class="d-fill" style="width:27.7%;background:var(--st-connected);"></span></span><span class="d-num">43 <span class="pct">27.7%</span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div><h2>Does the call actually predict closing the job?</h2>
+        <p>Spoke vs No Spoke (Busy, No answer, Wrong/missing number combined) — the share of each that reached "Done."</p></div>
+      </div>
+      <div class="panel-body">
+        <div class="conv-grid">
+          <table class="conv-table">
+            <caption>CSP leg</caption>
+            <thead><tr><th>Disposition</th><th class="num">Leads</th><th class="num">Done</th><th>% Done</th></tr></thead>
+            <tbody>
+              <tr><td class="label">Spoke</td><td class="num">43</td><td class="num">21</td><td><div class="conv-bar-cell"><span class="donepct mid">48.8%</span><div class="conv-bar-track"><div class="conv-bar-fill" style="width:48.8%;background:var(--st-progress);"></div></div></div></td></tr>
+              <tr><td class="label">No Spoke<span class="sub">Busy · No answer · Wrong number</span></td><td class="num">112</td><td class="num">50</td><td><div class="conv-bar-cell"><span class="donepct mid">44.6%</span><div class="conv-bar-track"><div class="conv-bar-fill" style="width:44.6%;background:var(--st-progress);"></div></div></div></td></tr>
+            </tbody>
+          </table>
+          <table class="conv-table">
+            <caption>Customer leg</caption>
+            <thead><tr><th>Disposition</th><th class="num">Leads</th><th class="num">Done</th><th>% Done</th></tr></thead>
+            <tbody>
+              <tr><td class="label">Spoke</td><td class="num">43</td><td class="num">16</td><td><div class="conv-bar-cell"><span class="donepct lo">37.2%</span><div class="conv-bar-track"><div class="conv-bar-fill" style="width:37.2%;background:var(--st-noanswer);"></div></div></div></td></tr>
+              <tr><td class="label">No Spoke<span class="sub">Busy · No answer · Wrong number</span></td><td class="num">112</td><td class="num">55</td><td><div class="conv-bar-cell"><span class="donepct mid">49.1%</span><div class="conv-bar-track"><div class="conv-bar-fill" style="width:49.1%;background:var(--st-progress);"></div></div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="status-note">
+          <span class="tag">Read</span>
+          <span>CSP Spoke (49%) barely beats No Spoke (45%) now — the gap that used to matter here has mostly closed. The customer leg still runs backwards: Spoke (37%) trails No Spoke (49%).</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= TAB 2: VISIT DAY ================= -->
+  <div class="tabpanel" id="t2">
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>2 · Visit Day — Slot Confirmation by 12 PM</h2>
+          <p>Visit is today and the CSP hasn't called the customer by noon. Goal: customer knows when the technician is coming.</p>
+        </div>
+        <div class="panel-badge"><div class="num">171</div><div class="lbl">leads</div></div>
+      </div>
+      <div class="panel-body">
+        <div class="row-2">
+          <div>
+            <div class="block-label">Leads by day</div>
+            <div class="daybars">
+              <div class="daybar-col"><div class="daybar-track"><div class="daybar-fill" style="height:61.3%;background:var(--accent);"><span class="val"><span class="n">38</span><span class="p">22.2%</span></span></div></div><div class="day-lbl">26 Sep</div></div>
+              <div class="daybar-col"><div class="daybar-track"><div class="daybar-fill" style="height:100%;background:var(--accent);"><span class="val"><span class="n">62</span><span class="p">36.3%</span></span></div></div><div class="day-lbl">27 Sep</div></div>
+              <div class="daybar-col"><div class="daybar-track"><div class="daybar-fill" style="height:53.2%;background:var(--accent);"><span class="val"><span class="n">33</span><span class="p">19.3%</span></span></div></div><div class="day-lbl">28 Sep</div></div>
+              <div class="daybar-col"><div class="daybar-track"><div class="daybar-fill" style="height:61.3%;background:var(--st-pending);"><span class="val"><span class="n">38</span><span class="p">22.2%</span></span></div></div><div class="day-lbl">29 Sep</div></div>
+            </div>
+          </div>
+          <div>
+            <div class="block-label">Status mix</div>
+            <div class="stacked">
+              <div style="width:49.1%;background:var(--st-connected);"></div>
+              <div style="width:29.8%;background:var(--st-progress);"></div>
+              <div style="width:9.9%;background:var(--st-pending);"></div>
+              <div style="width:11.1%;background:var(--st-hold);"></div>
+            </div>
+            <div class="split-legend">
+              <div class="item"><span class="sw" style="background:var(--st-connected);"></span>Done <b>84</b> <span class="pct">49.1%</span></div>
+              <div class="item"><span class="sw" style="background:var(--st-progress);"></span>Carried over <b>51</b> <span class="pct">29.8%</span></div>
+              <div class="item"><span class="sw" style="background:var(--st-pending);"></span>Call now <b>17</b> <span class="pct">9.9%</span></div>
+              <div class="item"><span class="sw" style="background:var(--st-hold);"></span>Hold <b>19</b> <span class="pct">11.1%</span></div>
+            </div>
+            <div class="status-note" style="margin-top:14px;">
+              <span class="tag">Best resolving</span>
+              <span>49% reach "Done" — still the strongest close-out rate of the four queues.</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="block-label">Day-by-day trend</div>
+          <table class="trend-table">
+            <thead><tr><th>Date</th><th class="num">Leads</th><th class="num">Done %</th><th class="num">CSP connected %</th><th class="num">CX connected %</th></tr></thead>
+            <tbody>
+              <tr><td class="date">26 Sep</td><td class="num">38</td><td class="num">78.9%</td><td class="num">39.5%</td><td class="num">39.5%</td></tr>
+              <tr><td class="date">27 Sep</td><td class="num">62</td><td class="num">58.1%</td><td class="num">30.6%</td><td class="num">51.6%</td></tr>
+              <tr><td class="date">28 Sep</td><td class="num">33</td><td class="num">48.5%</td><td class="num">39.4%</td><td class="num">18.2%</td></tr>
+              <tr class="thin"><td class="date">29 Sep</td><td class="num">38</td><td class="num">5.3%</td><td class="num">21.1%</td><td class="num">2.6%</td></tr>
+            </tbody>
+          </table>
+          <div class="status-note" style="margin-top:12px;">
+            <span class="tag">Read</span>
+            <span>Customer connect spiked on 27 Sep (52%) then fell to 18% on 28 Sep — CSP connect has held steadier in the 21–39% band. 29 Sep is today's leads and still early.</span>
+          </div>
+        </div>
+
+        <div class="row-2-even">
+          <div class="funnel">
+            <div class="funnel-top"><div class="who">CSP calls <span>(1st leg)</span></div></div>
+            <div class="connected-stat"><span class="pct">32%</span><span class="pct-lbl">connected · 55 / 171</span></div>
+            <div class="progress-track"><div class="progress-fill" style="width:32%;"></div></div>
+            <div class="disp-list">
+              <div class="disp-row"><span class="d-name">No answer</span><span class="d-track"><span class="d-fill" style="width:36.3%;background:var(--st-noanswer);"></span></span><span class="d-num">62 <span class="pct">36.3%</span></span></div>
+              <div class="disp-row"><span class="d-name">Spoke</span><span class="d-track"><span class="d-fill" style="width:32.2%;background:var(--st-connected);"></span></span><span class="d-num">55 <span class="pct">32.2%</span></span></div>
+              <div class="disp-row"><span class="d-name">Not called</span><span class="d-track"><span class="d-fill" style="width:22.2%;background:var(--st-pending);"></span></span><span class="d-num">38 <span class="pct">22.2%</span></span></div>
+              <div class="disp-row"><span class="d-name">Busy – call back</span><span class="d-track"><span class="d-fill" style="width:9.4%;background:var(--st-progress);"></span></span><span class="d-num">16 <span class="pct">9.4%</span></span></div>
+            </div>
+          </div>
+          <div class="funnel">
+            <div class="funnel-top"><div class="who">Customer calls <span>(CX leg)</span></div></div>
+            <div class="connected-stat"><span class="pct">32%</span><span class="pct-lbl">connected · 54 / 171</span></div>
+            <div class="progress-track"><div class="progress-fill" style="width:32%;"></div></div>
+            <div class="disp-list">
+              <div class="disp-row"><span class="d-name">Not called</span><span class="d-track"><span class="d-fill" style="width:43.9%;background:var(--st-pending);"></span></span><span class="d-num">75 <span class="pct">43.9%</span></span></div>
+              <div class="disp-row"><span class="d-name">Spoke</span><span class="d-track"><span class="d-fill" style="width:31.6%;background:var(--st-connected);"></span></span><span class="d-num">54 <span class="pct">31.6%</span></span></div>
+              <div class="disp-row"><span class="d-name">No answer</span><span class="d-track"><span class="d-fill" style="width:24.0%;background:var(--st-noanswer);"></span></span><span class="d-num">41 <span class="pct">24.0%</span></span></div>
+              <div class="disp-row"><span class="d-name">Busy – call back</span><span class="d-track"><span class="d-fill" style="width:0.6%;background:var(--st-progress);"></span></span><span class="d-num">1 <span class="pct">0.6%</span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div><h2>Does the call actually predict closing the job?</h2>
+        <p>Spoke vs No Spoke (Busy, No answer, Wrong/missing number combined) — the share of each that reached "Done."</p></div>
+      </div>
+      <div class="panel-body">
+        <div class="conv-grid">
+          <table class="conv-table">
+            <caption>CSP leg</caption>
+            <thead><tr><th>Disposition</th><th class="num">Leads</th><th class="num">Done</th><th>% Done</th></tr></thead>
+            <tbody>
+              <tr><td class="label">Spoke</td><td class="num">55</td><td class="num">28</td><td><div class="conv-bar-cell"><span class="donepct mid">50.9%</span><div class="conv-bar-track"><div class="conv-bar-fill" style="width:50.9%;background:var(--st-progress);"></div></div></div></td></tr>
+              <tr><td class="label">No Spoke<span class="sub">Busy · No answer · Wrong number</span></td><td class="num">116</td><td class="num">56</td><td><div class="conv-bar-cell"><span class="donepct mid">48.3%</span><div class="conv-bar-track"><div class="conv-bar-fill" style="width:48.3%;background:var(--st-progress);"></div></div></div></td></tr>
+            </tbody>
+          </table>
+          <table class="conv-table">
+            <caption>Customer leg</caption>
+            <thead><tr><th>Disposition</th><th class="num">Leads</th><th class="num">Done</th><th>% Done</th></tr></thead>
+            <tbody>
+              <tr><td class="label">Spoke</td><td class="num">54</td><td class="num">34</td><td><div class="conv-bar-cell"><span class="donepct hi">63.0%</span><div class="conv-bar-track"><div class="conv-bar-fill" style="width:63%;background:var(--st-connected);"></div></div></div></td></tr>
+              <tr><td class="label">No Spoke<span class="sub">Busy · No answer · Wrong number</span></td><td class="num">117</td><td class="num">50</td><td><div class="conv-bar-cell"><span class="donepct mid">42.7%</span><div class="conv-bar-track"><div class="conv-bar-fill" style="width:42.7%;background:var(--st-progress);"></div></div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="status-note">
+          <span class="tag">Read</span>
+          <span>CSP Spoke (51%) and No Spoke (48%) are nearly identical — the CSP call isn't the lever here. Customer Spoke (63%) is still the strongest single signal in this queue.</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= TAB 3: MISSED VISIT ================= -->
+  <div class="tabpanel" id="t3">
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>3 · Missed Visit — Day 1</h2>
+          <p>Visit was yesterday, nobody came, and the CSP hasn't called the customer today by 10 am. Goal: new time, or job closed in the app.</p>
+        </div>
+        <div class="panel-badge"><div class="num">162</div><div class="lbl">leads</div></div>
+      </div>
+      <div class="panel-body">
+        <div class="row-2">
+          <div>
+            <div class="block-label">Leads by day</div>
+            <div class="daybars">
+              <div class="daybar-col"><div class="daybar-track"><div class="daybar-fill" style="height:100%;background:var(--accent);"><span class="val"><span class="n">50</span><span class="p">30.9%</span></span></div></div><div class="day-lbl">26 Sep</div></div>
+              <div class="daybar-col"><div class="daybar-track"><div class="daybar-fill" style="height:62%;background:var(--accent);"><span class="val"><span class="n">31</span><span class="p">19.1%</span></span></div></div><div class="day-lbl">27 Sep</div></div>
+              <div class="daybar-col"><div class="daybar-track"><div class="daybar-fill" style="height:96%;background:var(--accent);"><span class="val"><span class="n">48</span><span class="p">29.6%</span></span></div></div><div class="day-lbl">28 Sep</div></div>
+              <div class="daybar-col"><div class="daybar-track"><div class="daybar-fill" style="height:66%;background:var(--st-pending);"><span class="val"><span class="n">33</span><span class="p">20.4%</span></span></div></div><div class="day-lbl">29 Sep</div></div>
+            </div>
+          </div>
+          <div>
+            <div class="block-label">Status mix</div>
+            <div class="stacked">
+              <div style="width:51.9%;background:var(--st-connected);"></div>
+              <div style="width:30.9%;background:var(--st-progress);"></div>
+              <div style="width:12.3%;background:var(--st-pending);"></div>
+              <div style="width:4.9%;background:var(--st-hold);"></div>
+            </div>
+            <div class="split-legend">
+              <div class="item"><span class="sw" style="background:var(--st-connected);"></span>Done <b>84</b> <span class="pct">51.9%</span></div>
+              <div class="item"><span class="sw" style="background:var(--st-progress);"></span>Carried over <b>50</b> <span class="pct">30.9%</span></div>
+              <div class="item"><span class="sw" style="background:var(--st-pending);"></span>Call now <b>20</b> <span class="pct">12.3%</span></div>
+              <div class="item"><span class="sw" style="background:var(--st-hold);"></span>Hold <b>8</b> <span class="pct">4.9%</span></div>
+            </div>
+            <div class="status-note" style="margin-top:14px;">
+              <span class="tag">Scale</span>
+              <span>This queue carries the most leads of the four (162) and has the weakest customer-leg contact rate — see below.</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="block-label">Day-by-day trend</div>
+          <table class="trend-table">
+            <thead><tr><th>Date</th><th class="num">Leads</th><th class="num">Done %</th><th class="num">CSP connected %</th><th class="num">CX connected %</th></tr></thead>
+            <tbody>
+              <tr><td class="date">26 Sep</td><td class="num">50</td><td class="num">100%</td><td class="num">26.0%</td><td class="num">32.0%</td></tr>
+              <tr><td class="date">27 Sep</td><td class="num">31</td><td class="num">58.1%</td><td class="num">25.8%</td><td class="num">6.5%</td></tr>
+              <tr><td class="date">28 Sep</td><td class="num">48</td><td class="num">22.9%</td><td class="num">14.6%</td><td class="num">6.2%</td></tr>
+              <tr class="thin"><td class="date">29 Sep</td><td class="num">33</td><td class="num">15.2%</td><td class="num">24.2%</td><td class="num">6.1%</td></tr>
+            </tbody>
+          </table>
+          <div class="status-note" style="margin-top:12px;">
+            <span class="tag">Read</span>
+            <span>Customer connect rate has been sliding since 26 Sep (32% → ~6%) and hasn't recovered — the "never called" bottleneck is getting worse, not better. 28–29 Sep Done % looks low partly because those leads haven't had a full day to close yet.</span>
+          </div>
+        </div>
+
+        <div class="row-2-even">
+          <div class="funnel">
+            <div class="funnel-top"><div class="who">CSP calls <span>(1st leg)</span></div></div>
+            <div class="connected-stat"><span class="pct">22%</span><span class="pct-lbl">connected · 36 / 162</span></div>
+            <div class="progress-track"><div class="progress-fill" style="width:22%;"></div></div>
+            <div class="disp-list">
+              <div class="disp-row"><span class="d-name">No answer</span><span class="d-track"><span class="d-fill" style="width:35.8%;background:var(--st-noanswer);"></span></span><span class="d-num">58 <span class="pct">35.8%</span></span></div>
+              <div class="disp-row"><span class="d-name">Not called</span><span class="d-track"><span class="d-fill" style="width:32.1%;background:var(--st-pending);"></span></span><span class="d-num">52 <span class="pct">32.1%</span></span></div>
+              <div class="disp-row"><span class="d-name">Spoke</span><span class="d-track"><span class="d-fill" style="width:22.2%;background:var(--st-connected);"></span></span><span class="d-num">36 <span class="pct">22.2%</span></span></div>
+              <div class="disp-row"><span class="d-name">Busy – call back</span><span class="d-track"><span class="d-fill" style="width:9.9%;background:var(--st-progress);"></span></span><span class="d-num">16 <span class="pct">9.9%</span></span></div>
+            </div>
+          </div>
+          <div class="funnel">
+            <div class="funnel-top"><div class="who">Customer calls <span>(CX leg)</span></div></div>
+            <div class="connected-stat"><span class="pct">14%</span><span class="pct-lbl">connected · 23 / 162</span></div>
+            <div class="progress-track"><div class="progress-fill" style="width:14%;"></div></div>
+            <div class="disp-list">
+              <div class="disp-row"><span class="d-name">Not called</span><span class="d-track"><span class="d-fill" style="width:74.7%;background:var(--st-pending);"></span></span><span class="d-num">121 <span class="pct">74.7%</span></span></div>
+              <div class="disp-row"><span class="d-name">Spoke</span><span class="d-track"><span class="d-fill" style="width:14.2%;background:var(--st-connected);"></span></span><span class="d-num">23 <span class="pct">14.2%</span></span></div>
+              <div class="disp-row"><span class="d-name">No answer</span><span class="d-track"><span class="d-fill" style="width:10.5%;background:var(--st-noanswer);"></span></span><span class="d-num">17 <span class="pct">10.5%</span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div><h2>Does the call actually predict closing the job?</h2>
+        <p>Spoke vs No Spoke (Busy, No answer, Wrong/missing number combined) — the share of each that reached "Done."</p></div>
+      </div>
+      <div class="panel-body">
+        <div class="conv-grid">
+          <table class="conv-table">
+            <caption>CSP leg</caption>
+            <thead><tr><th>Disposition</th><th class="num">Leads</th><th class="num">Done</th><th>% Done</th></tr></thead>
+            <tbody>
+              <tr><td class="label">Spoke</td><td class="num">36</td><td class="num">22</td><td><div class="conv-bar-cell"><span class="donepct hi">61.1%</span><div class="conv-bar-track"><div class="conv-bar-fill" style="width:61.1%;background:var(--st-connected);"></div></div></div></td></tr>
+              <tr><td class="label">No Spoke<span class="sub">Busy · No answer · Wrong number</span></td><td class="num">126</td><td class="num">62</td><td><div class="conv-bar-cell"><span class="donepct mid">49.2%</span><div class="conv-bar-track"><div class="conv-bar-fill" style="width:49.2%;background:var(--st-progress);"></div></div></div></td></tr>
+            </tbody>
+          </table>
+          <table class="conv-table">
+            <caption>Customer leg</caption>
+            <thead><tr><th>Disposition</th><th class="num">Leads</th><th class="num">Done</th><th>% Done</th></tr></thead>
+            <tbody>
+              <tr><td class="label">Spoke</td><td class="num">23</td><td class="num">18</td><td><div class="conv-bar-cell"><span class="donepct hi">78.3%</span><div class="conv-bar-track"><div class="conv-bar-fill" style="width:78.3%;background:var(--st-connected);"></div></div></div></td></tr>
+              <tr><td class="label">No Spoke<span class="sub">Busy · No answer · Wrong number</span></td><td class="num">139</td><td class="num">66</td><td><div class="conv-bar-cell"><span class="donepct mid">47.5%</span><div class="conv-bar-track"><div class="conv-bar-fill" style="width:47.5%;background:var(--st-progress);"></div></div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="status-note">
+          <span class="tag">Bottleneck confirmed</span>
+          <span>Reaching someone still nearly doubles the close rate (61–78% Spoke vs 47–49% No Spoke). The bottleneck isn't the outcome of the call — it's that 75% of customers in this queue are never called at all (see the CX breakdown above).</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= TAB 4: AFTER ARRIVAL ================= -->
+  <div class="tabpanel" id="t4">
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>4 · After Arrival — 3 Hours</h2>
+          <p>Technician reached 3+ hours ago and installation still isn't finished. Goal: know what's stuck; CSP closes it in the app.</p>
+        </div>
+        <div class="panel-badge"><div class="num">69</div><div class="lbl">leads</div></div>
+      </div>
+      <div class="panel-body">
+        <div class="row-2">
+          <div>
+            <div class="block-label">Leads by day</div>
+            <div class="daybars">
+              <div class="daybar-col"><div class="daybar-track"><div class="daybar-fill" style="height:100%;background:var(--accent);"><span class="val"><span class="n">29</span><span class="p">42.0%</span></span></div></div><div class="day-lbl">26 Sep</div></div>
+              <div class="daybar-col"><div class="daybar-track"><div class="daybar-fill" style="height:69%;background:var(--accent);"><span class="val"><span class="n">20</span><span class="p">29.0%</span></span></div></div><div class="day-lbl">27 Sep</div></div>
+              <div class="daybar-col"><div class="daybar-track"><div class="daybar-fill" style="height:59%;background:var(--accent);"><span class="val"><span class="n">17</span><span class="p">24.6%</span></span></div></div><div class="day-lbl">28 Sep</div></div>
+              <div class="daybar-col"><div class="daybar-track"><div class="daybar-fill" style="height:10%;background:var(--st-pending);"><span class="val"><span class="n">3</span><span class="p">4.3%</span></span></div></div><div class="day-lbl">29 Sep</div></div>
+            </div>
+          </div>
+          <div>
+            <div class="block-label">Status mix</div>
+            <div class="stacked">
+              <div style="width:78.3%;background:var(--st-connected);"></div>
+              <div style="width:11.6%;background:var(--st-progress);"></div>
+              <div style="width:8.7%;background:var(--st-hold);"></div>
+              <div style="width:1.4%;background:var(--st-pending);"></div>
+            </div>
+            <div class="split-legend">
+              <div class="item"><span class="sw" style="background:var(--st-connected);"></span>Done <b>54</b> <span class="pct">78.3%</span></div>
+              <div class="item"><span class="sw" style="background:var(--st-progress);"></span>Carried over <b>8</b> <span class="pct">11.6%</span></div>
+              <div class="item"><span class="sw" style="background:var(--st-hold);"></span>Hold <b>6</b> <span class="pct">8.7%</span></div>
+              <div class="item"><span class="sw" style="background:var(--st-pending);"></span>Call now <b>1</b> <span class="pct">1.4%</span></div>
+            </div>
+            <div class="status-note" style="margin-top:14px;">
+              <span class="tag">Fastest close</span>
+              <span>78% reach "Done" — these installs are usually just minutes from finished when this queue fires, so most self-resolve quickly.</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="block-label">Day-by-day trend</div>
+          <table class="trend-table">
+            <thead><tr><th>Date</th><th class="num">Leads</th><th class="num">Done %</th><th class="num">CSP connected %</th><th class="num">CX connected %</th></tr></thead>
+            <tbody>
+              <tr><td class="date">26 Sep</td><td class="num">29</td><td class="num">89.7%</td><td class="num">31.0%</td><td class="num">6.9%</td></tr>
+              <tr><td class="date">27 Sep</td><td class="num">20</td><td class="num">90.0%</td><td class="num">30.0%</td><td class="num">5.0%</td></tr>
+              <tr><td class="date">28 Sep</td><td class="num">17</td><td class="num">58.8%</td><td class="num">5.9%</td><td class="num">0.0%</td></tr>
+              <tr class="thin"><td class="date">29 Sep</td><td class="num">3</td><td class="num">0.0%</td><td class="num">33.3%</td><td class="num">0.0%</td></tr>
+            </tbody>
+          </table>
+          <div class="status-note" style="margin-top:12px;">
+            <span class="tag">Read</span>
+            <span>CSP connect rate dropped sharply on 28 Sep (6% vs ~30% before) and Done % followed it down — this queue usually resolves fast, so a same-day dip here is worth flagging early. 29 Sep is only 3 leads so far, too small to read as a recovery.</span>
+          </div>
+        </div>
+
+        <div class="row-2-even">
+          <div class="funnel">
+            <div class="funnel-top"><div class="who">CSP calls <span>(1st leg)</span></div></div>
+            <div class="connected-stat"><span class="pct">25%</span><span class="pct-lbl">connected · 17 / 69</span></div>
+            <div class="progress-track"><div class="progress-fill" style="width:25%;"></div></div>
+            <div class="disp-list">
+              <div class="disp-row"><span class="d-name">Not called</span><span class="d-track"><span class="d-fill" style="width:42.0%;background:var(--st-pending);"></span></span><span class="d-num">29 <span class="pct">42.0%</span></span></div>
+              <div class="disp-row"><span class="d-name">No answer</span><span class="d-track"><span class="d-fill" style="width:30.4%;background:var(--st-noanswer);"></span></span><span class="d-num">21 <span class="pct">30.4%</span></span></div>
+              <div class="disp-row"><span class="d-name">Spoke</span><span class="d-track"><span class="d-fill" style="width:24.6%;background:var(--st-connected);"></span></span><span class="d-num">17 <span class="pct">24.6%</span></span></div>
+              <div class="disp-row"><span class="d-name">Busy – call back</span><span class="d-track"><span class="d-fill" style="width:2.9%;background:var(--st-progress);"></span></span><span class="d-num">2 <span class="pct">2.9%</span></span></div>
+            </div>
+          </div>
+          <div class="funnel">
+            <div class="funnel-top"><div class="who">Customer calls <span>(CX leg)</span></div></div>
+            <div class="connected-stat"><span class="pct">4%</span><span class="pct-lbl">connected · 3 / 69</span></div>
+            <div class="progress-track"><div class="progress-fill" style="width:4%;"></div></div>
+            <div class="disp-list">
+              <div class="disp-row"><span class="d-name">Not called</span><span class="d-track"><span class="d-fill" style="width:82.6%;background:var(--st-pending);"></span></span><span class="d-num">57 <span class="pct">82.6%</span></span></div>
+              <div class="disp-row"><span class="d-name">No answer</span><span class="d-track"><span class="d-fill" style="width:13.0%;background:var(--st-noanswer);"></span></span><span class="d-num">9 <span class="pct">13.0%</span></span></div>
+              <div class="disp-row"><span class="d-name">Spoke</span><span class="d-track"><span class="d-fill" style="width:4.3%;background:var(--st-connected);"></span></span><span class="d-num">3 <span class="pct">4.3%</span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div><h2>Does the call actually predict closing the job?</h2>
+        <p>Spoke vs No Spoke (Busy, No answer, Wrong/missing number combined) — the share of each that reached "Done."</p></div>
+      </div>
+      <div class="panel-body">
+        <div class="conv-grid">
+          <table class="conv-table">
+            <caption>CSP leg</caption>
+            <thead><tr><th>Disposition</th><th class="num">Leads</th><th class="num">Done</th><th>% Done</th></tr></thead>
+            <tbody>
+              <tr><td class="label">Spoke</td><td class="num">17</td><td class="num">15</td><td><div class="conv-bar-cell"><span class="donepct hi">88.2%</span><div class="conv-bar-track"><div class="conv-bar-fill" style="width:88.2%;background:var(--st-connected);"></div></div></div></td></tr>
+              <tr><td class="label">No Spoke<span class="sub">Busy · No answer · Wrong number</span></td><td class="num">52</td><td class="num">39</td><td><div class="conv-bar-cell"><span class="donepct hi">75.0%</span><div class="conv-bar-track"><div class="conv-bar-fill" style="width:75%;background:var(--st-connected);"></div></div></div></td></tr>
+            </tbody>
+          </table>
+          <table class="conv-table">
+            <caption>Customer leg</caption>
+            <thead><tr><th>Disposition</th><th class="num">Leads</th><th class="num">Done</th><th>% Done</th></tr></thead>
+            <tbody>
+              <tr><td class="label">Spoke</td><td class="num">3</td><td class="num">3</td><td><div class="conv-bar-cell"><span class="donepct hi">100%</span><div class="conv-bar-track"><div class="conv-bar-fill" style="width:100%;background:var(--st-connected);"></div></div></div></td></tr>
+              <tr><td class="label">No Spoke<span class="sub">Busy · No answer · Wrong number</span></td><td class="num">66</td><td class="num">51</td><td><div class="conv-bar-cell"><span class="donepct hi">77.3%</span><div class="conv-bar-track"><div class="conv-bar-fill" style="width:77.3%;background:var(--st-connected);"></div></div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="status-note">
+          <span class="tag">Read</span>
+          <span>Everything closes well here (75–100%) whether or not the call connects — After Arrival jobs are mostly already finished by the time this queue fires, so the call is more confirmation than intervention.</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>B2I Escalation Workstream — full pull, filters cleared, 29 Sep 2026 · 557 real leads across 26–29 Sep · practice rows excluded.</footer>
+</div>
+
+<script>
+  (function(){
+    var buttons = document.querySelectorAll('.tabbtn');
+    var panels = document.querySelectorAll('.tabpanel');
+    buttons.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var target = btn.getAttribute('data-tab');
+        buttons.forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+        panels.forEach(function(p){ p.classList.remove('active'); });
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected','true');
+        document.getElementById(target).classList.add('active');
+      });
+    });
+  })();
+</script>
