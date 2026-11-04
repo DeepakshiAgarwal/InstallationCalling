@@ -143,6 +143,14 @@
   .trend-table tr:last-child td{ border-bottom:none; }
   .trend-table tr.thin td{ color:var(--muted); }
   footer{ color:var(--muted); font-size:12px; text-align:center; padding-top:8px; }
+  .tbl-scroll{ overflow-x:auto; }
+  .trend-table th small{ display:block; font-weight:400; color:var(--muted); font-size:10.5px; margin-top:1px; }
+  .trend-table .cp{ display:block; font-size:10.5px; color:var(--muted); font-weight:400; }
+  .trend-table td.strong{ font-weight:700; }
+  .trend-table tr.total td{ font-weight:700; background:var(--surface-2); }
+  .stk{ display:flex; height:12px; min-width:120px; border-radius:6px; overflow:hidden; background:var(--surface-3); }
+  .stk > div{ height:100%; }
+  .tabbar{ flex-wrap:wrap; }
   @media (max-width:860px){
     .kpi-grid{grid-template-columns:repeat(2,1fr);}
     .row-2, .row-2-even, .conv-grid, .reason-grid{grid-template-columns:1fr;}
@@ -158,9 +166,10 @@
     <h1>Escalation Queue Console</h1>
     <p class="subhead">Full picture across the call queues — leads by day, how each queue resolves, how far CSP and customer calls got, and how much each outcome actually predicts closing the job.</p>
     <div class="meta-row">
-      <span class="pill"><span class="dot"></span>Refreshed 26 Oct 2026 · filters cleared for this pull</span>
+      <span class="pill"><span class="dot"></span>Refreshed 4 Nov 2026 · filters cleared for this pull</span>
       <span class="pill">Source: B2I Escalation Workstream sheet</span>
       <span class="pill">791 real escalations (practice rows excluded)</span>
+      <span class="pill">Tabs 4 and 6: data to 26 Oct 2026</span>
     </div>
   </header>
 
@@ -178,6 +187,7 @@
   <div class="tabbar" role="tablist">
     <button class="tabbtn active" data-tab="t4" role="tab" aria-selected="true">4 · After Arrival<span class="n">570</span></button>
     <button class="tabbtn" data-tab="t5" role="tab" aria-selected="false">6 · Job Accepted, not connected<span class="n">221</span></button>
+    <button class="tabbtn" data-tab="tR" role="tab" aria-selected="false">Reactive · Agents<span class="n">449</span></button>
   </div>
 
   <div class="tabpanel active" id="t4">
@@ -527,7 +537,203 @@
   </div>
 
 
-  <footer>B2I Escalation Workstream — full pull, filters cleared, 26 Oct 2026 · 791 real leads · practice rows excluded.</footer>
+  <div class="tabpanel" id="tR">
+    <section class="panel">
+      <div class="panel-head">
+        <div><h2>Reactive · Agent scorecard</h2><p>Kriti, Nitin and Pintoo side by side: how many cases each handled, how far the CSP and customer calls got, and how many cases ended resolved.</p></div>
+        <div class="panel-badge"><div class="num">449</div><div class="lbl">cases handled</div></div>
+      </div>
+      <div class="panel-body">
+        <div class="kpi-grid">
+    <div class="kpi"><div class="k-label">Kriti</div><div class="k-value">122</div><div class="k-sub"><b>36.8% both connected</b><br>CSP 47.9% · CX 50%<br>16.4% resolved</div></div>
+    <div class="kpi"><div class="k-label">Nitin</div><div class="k-value">181</div><div class="k-sub"><b>12.8% both connected</b><br>CSP 25.8% · CX 22.2%<br>17.7% resolved</div></div>
+    <div class="kpi"><div class="k-label">Pintoo</div><div class="k-value">146</div><div class="k-sub"><b>21.7% both connected</b><br>CSP 37.7% · CX 39.1%<br>19.2% resolved</div></div>
+    <div class="kpi"><div class="k-label">All three</div><div class="k-value">449</div><div class="k-sub"><b>17.6% both connected</b><br>CSP 34.8% · CX 30.3%<br>17.8% resolved</div></div>
+        </div>
+        <div class="tbl-scroll">
+          <table class="trend-table">
+            <thead><tr><th>Agent</th><th class="num">Cases</th><th class="num">CSP calls made</th><th class="num">CSP connect % <small>of calls made</small></th><th class="num">CX calls made</th><th class="num">CX connect % <small>of calls made</small></th><th class="num">Both connected <small>of cases with both dialled</small></th><th class="num">Avg tries per call</th><th class="num">Resolved %</th><th class="num">Open + overdue</th></tr></thead>
+            <tbody>
+            <tr><td class="date">Kriti</td><td class="num">122</td><td class="num">71</td><td class="num">47.9%</td><td class="num">20</td><td class="num">50%</td><td class="num">7 of 19<span class="cp">36.8%</span></td><td class="num">1.33</td><td class="num">16.4%</td><td class="num">49</td></tr>
+            <tr><td class="date">Nitin</td><td class="num">181</td><td class="num">120</td><td class="num">25.8%</td><td class="num">117</td><td class="num">22.2%</td><td class="num">15 of 117<span class="cp">12.8%</span></td><td class="num">1.2</td><td class="num">17.7%</td><td class="num">38</td></tr>
+            <tr><td class="date">Pintoo</td><td class="num">146</td><td class="num">53</td><td class="num">37.7%</td><td class="num">64</td><td class="num">39.1%</td><td class="num">10 of 46<span class="cp">21.7%</span></td><td class="num">1.24</td><td class="num">19.2%</td><td class="num">81</td></tr>
+            <tr class="total"><td class="date">All three</td><td class="num">449</td><td class="num">244</td><td class="num">34.8%</td><td class="num">201</td><td class="num">30.3%</td><td class="num">32 of 182<span class="cp">17.6%</span></td><td class="num">1.24</td><td class="num">17.8%</td><td class="num">168</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="status-note"><span class="tag">Scope</span><span>Only cases with an agent name are scored here: 449 of 1327 reactive cases. The other 878 have no name against them (auto-closed or not worked by these three), so they are shown only as context in the status table. A call counts as made when the result is Spoke, No answer, Busy or Wrong number; "not required" and blank are not calls. Resolved = Done (installed, date moved, or time fixed on a joint call).</span></div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head">
+        <div><h2>Reactive · CSP call view</h2><p>What happened on the CSP leg of each case, by agent. Connect % counts only cases where a call was actually made.</p></div>
+        
+      </div>
+      <div class="panel-body">
+        <div class="split-legend"><div class="item"><span class="sw" style="background:var(--st-connected);"></span>Spoke</div><div class="item"><span class="sw" style="background:var(--st-noanswer);"></span>No answer</div><div class="item"><span class="sw" style="background:var(--st-progress);"></span>Busy / wrong</div><div class="item"><span class="sw" style="background:var(--st-hold);"></span>Not required</div><div class="item"><span class="sw" style="background:var(--st-pending);"></span>Not called</div></div>
+        <div class="tbl-scroll">
+          <table class="trend-table">
+            <thead><tr><th>Agent</th><th class="num">Cases</th><th class="num">Spoke</th><th class="num">No answer</th><th class="num">Busy / wrong</th><th class="num">Not required</th><th class="num">Not called</th><th>Mix</th><th class="num">Connect % <small>of calls made</small></th></tr></thead>
+            <tbody>
+            <tr><td class="date">Kriti</td><td class="num">122</td><td class="num">34<span class="cp">27.9%</span></td><td class="num">35<span class="cp">28.7%</span></td><td class="num">2<span class="cp">1.6%</span></td><td class="num">5<span class="cp">4.1%</span></td><td class="num">46<span class="cp">37.7%</span></td><td><div class="stk"><div style="width:27.87%;background:var(--st-connected);" title="Spoke: 34"></div><div style="width:28.69%;background:var(--st-noanswer);" title="No answer: 35"></div><div style="width:1.64%;background:var(--st-progress);" title="Busy / wrong: 2"></div><div style="width:4.1%;background:var(--st-hold);" title="Not required: 5"></div><div style="width:37.7%;background:var(--st-pending);" title="Not called: 46"></div></div></td><td class="num strong">47.9%<span class="cp">34 of 71</span></td></tr>
+            <tr><td class="date">Nitin</td><td class="num">181</td><td class="num">31<span class="cp">17.1%</span></td><td class="num">89<span class="cp">49.2%</span></td><td class="num">0<span class="cp">0%</span></td><td class="num">40<span class="cp">22.1%</span></td><td class="num">21<span class="cp">11.6%</span></td><td><div class="stk"><div style="width:17.13%;background:var(--st-connected);" title="Spoke: 31"></div><div style="width:49.17%;background:var(--st-noanswer);" title="No answer: 89"></div><div style="width:22.1%;background:var(--st-hold);" title="Not required: 40"></div><div style="width:11.6%;background:var(--st-pending);" title="Not called: 21"></div></div></td><td class="num strong">25.8%<span class="cp">31 of 120</span></td></tr>
+            <tr><td class="date">Pintoo</td><td class="num">146</td><td class="num">20<span class="cp">13.7%</span></td><td class="num">33<span class="cp">22.6%</span></td><td class="num">0<span class="cp">0%</span></td><td class="num">0<span class="cp">0%</span></td><td class="num">93<span class="cp">63.7%</span></td><td><div class="stk"><div style="width:13.7%;background:var(--st-connected);" title="Spoke: 20"></div><div style="width:22.6%;background:var(--st-noanswer);" title="No answer: 33"></div><div style="width:63.7%;background:var(--st-pending);" title="Not called: 93"></div></div></td><td class="num strong">37.7%<span class="cp">20 of 53</span></td></tr>
+            <tr class="total"><td class="date">All three</td><td class="num">449</td><td class="num">85<span class="cp">18.9%</span></td><td class="num">157<span class="cp">35%</span></td><td class="num">2<span class="cp">0.4%</span></td><td class="num">45<span class="cp">10%</span></td><td class="num">160<span class="cp">35.6%</span></td><td><div class="stk"><div style="width:18.93%;background:var(--st-connected);" title="Spoke: 85"></div><div style="width:34.97%;background:var(--st-noanswer);" title="No answer: 157"></div><div style="width:0.45%;background:var(--st-progress);" title="Busy / wrong: 2"></div><div style="width:10.02%;background:var(--st-hold);" title="Not required: 45"></div><div style="width:35.63%;background:var(--st-pending);" title="Not called: 160"></div></div></td><td class="num strong">34.8%<span class="cp">85 of 244</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head">
+        <div><h2>Reactive · Customer call view</h2><p>What happened on the customer leg of each case, by agent. Connect % counts only cases where a call was actually made.</p></div>
+        
+      </div>
+      <div class="panel-body">
+        <div class="split-legend"><div class="item"><span class="sw" style="background:var(--st-connected);"></span>Spoke</div><div class="item"><span class="sw" style="background:var(--st-noanswer);"></span>No answer</div><div class="item"><span class="sw" style="background:var(--st-progress);"></span>Busy / wrong</div><div class="item"><span class="sw" style="background:var(--st-hold);"></span>Not required</div><div class="item"><span class="sw" style="background:var(--st-pending);"></span>Not called</div></div>
+        <div class="tbl-scroll">
+          <table class="trend-table">
+            <thead><tr><th>Agent</th><th class="num">Cases</th><th class="num">Spoke</th><th class="num">No answer</th><th class="num">Busy / wrong</th><th class="num">Not required</th><th class="num">Not called</th><th>Mix</th><th class="num">Connect % <small>of calls made</small></th></tr></thead>
+            <tbody>
+            <tr><td class="date">Kriti</td><td class="num">122</td><td class="num">10<span class="cp">8.2%</span></td><td class="num">10<span class="cp">8.2%</span></td><td class="num">0<span class="cp">0%</span></td><td class="num">6<span class="cp">4.9%</span></td><td class="num">96<span class="cp">78.7%</span></td><td><div class="stk"><div style="width:8.2%;background:var(--st-connected);" title="Spoke: 10"></div><div style="width:8.2%;background:var(--st-noanswer);" title="No answer: 10"></div><div style="width:4.92%;background:var(--st-hold);" title="Not required: 6"></div><div style="width:78.69%;background:var(--st-pending);" title="Not called: 96"></div></div></td><td class="num strong">50%<span class="cp">10 of 20</span></td></tr>
+            <tr><td class="date">Nitin</td><td class="num">181</td><td class="num">26<span class="cp">14.4%</span></td><td class="num">91<span class="cp">50.3%</span></td><td class="num">0<span class="cp">0%</span></td><td class="num">43<span class="cp">23.8%</span></td><td class="num">21<span class="cp">11.6%</span></td><td><div class="stk"><div style="width:14.36%;background:var(--st-connected);" title="Spoke: 26"></div><div style="width:50.28%;background:var(--st-noanswer);" title="No answer: 91"></div><div style="width:23.76%;background:var(--st-hold);" title="Not required: 43"></div><div style="width:11.6%;background:var(--st-pending);" title="Not called: 21"></div></div></td><td class="num strong">22.2%<span class="cp">26 of 117</span></td></tr>
+            <tr><td class="date">Pintoo</td><td class="num">146</td><td class="num">25<span class="cp">17.1%</span></td><td class="num">39<span class="cp">26.7%</span></td><td class="num">0<span class="cp">0%</span></td><td class="num">46<span class="cp">31.5%</span></td><td class="num">36<span class="cp">24.7%</span></td><td><div class="stk"><div style="width:17.12%;background:var(--st-connected);" title="Spoke: 25"></div><div style="width:26.71%;background:var(--st-noanswer);" title="No answer: 39"></div><div style="width:31.51%;background:var(--st-hold);" title="Not required: 46"></div><div style="width:24.66%;background:var(--st-pending);" title="Not called: 36"></div></div></td><td class="num strong">39.1%<span class="cp">25 of 64</span></td></tr>
+            <tr class="total"><td class="date">All three</td><td class="num">449</td><td class="num">61<span class="cp">13.6%</span></td><td class="num">140<span class="cp">31.2%</span></td><td class="num">0<span class="cp">0%</span></td><td class="num">95<span class="cp">21.2%</span></td><td class="num">153<span class="cp">34.1%</span></td><td><div class="stk"><div style="width:13.59%;background:var(--st-connected);" title="Spoke: 61"></div><div style="width:31.18%;background:var(--st-noanswer);" title="No answer: 140"></div><div style="width:21.16%;background:var(--st-hold);" title="Not required: 95"></div><div style="width:34.08%;background:var(--st-pending);" title="Not called: 153"></div></div></td><td class="num strong">30.3%<span class="cp">61 of 201</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head">
+        <div><h2>Reactive · Both sides connected</h2><p>How often the agent reached the CSP and the customer on the same case.</p></div>
+        
+      </div>
+      <div class="panel-body">
+        <div class="split-legend"><div class="item"><span class="sw" style="background:var(--st-connected);"></span>Both connected</div><div class="item"><span class="sw" style="background:var(--accent);"></span>CSP only</div><div class="item"><span class="sw" style="background:var(--st-progress);"></span>CX only</div><div class="item"><span class="sw" style="background:var(--st-noanswer);"></span>Called, nobody connected</div><div class="item"><span class="sw" style="background:var(--st-pending);"></span>No call made</div></div>
+        <div class="tbl-scroll">
+          <table class="trend-table">
+            <thead><tr><th>Agent</th><th class="num">Cases</th><th class="num">Both connected</th><th class="num">CSP only</th><th class="num">CX only</th><th class="num">Called, nobody connected</th><th class="num">No call made</th><th>Mix</th><th class="num">Both connected % <small>of cases where both were dialled</small></th></tr></thead>
+            <tbody>
+            <tr><td class="date">Kriti</td><td class="num">122</td><td class="num">7<span class="cp">5.7%</span></td><td class="num">27<span class="cp">22.1%</span></td><td class="num">3<span class="cp">2.5%</span></td><td class="num">35<span class="cp">28.7%</span></td><td class="num">50<span class="cp">41%</span></td><td><div class="stk"><div style="width:5.74%;background:var(--st-connected);" title="Both connected: 7"></div><div style="width:22.13%;background:var(--accent);" title="CSP only: 27"></div><div style="width:2.46%;background:var(--st-progress);" title="CX only: 3"></div><div style="width:28.69%;background:var(--st-noanswer);" title="Called, nobody connected: 35"></div><div style="width:40.98%;background:var(--st-pending);" title="No call made: 50"></div></div></td><td class="num strong">36.8%<span class="cp">7 of 19</span></td></tr>
+            <tr><td class="date">Nitin</td><td class="num">181</td><td class="num">15<span class="cp">8.3%</span></td><td class="num">16<span class="cp">8.8%</span></td><td class="num">11<span class="cp">6.1%</span></td><td class="num">78<span class="cp">43.1%</span></td><td class="num">61<span class="cp">33.7%</span></td><td><div class="stk"><div style="width:8.29%;background:var(--st-connected);" title="Both connected: 15"></div><div style="width:8.84%;background:var(--accent);" title="CSP only: 16"></div><div style="width:6.08%;background:var(--st-progress);" title="CX only: 11"></div><div style="width:43.09%;background:var(--st-noanswer);" title="Called, nobody connected: 78"></div><div style="width:33.7%;background:var(--st-pending);" title="No call made: 61"></div></div></td><td class="num strong">12.8%<span class="cp">15 of 117</span></td></tr>
+            <tr><td class="date">Pintoo</td><td class="num">146</td><td class="num">10<span class="cp">6.8%</span></td><td class="num">10<span class="cp">6.8%</span></td><td class="num">15<span class="cp">10.3%</span></td><td class="num">36<span class="cp">24.7%</span></td><td class="num">75<span class="cp">51.4%</span></td><td><div class="stk"><div style="width:6.85%;background:var(--st-connected);" title="Both connected: 10"></div><div style="width:6.85%;background:var(--accent);" title="CSP only: 10"></div><div style="width:10.27%;background:var(--st-progress);" title="CX only: 15"></div><div style="width:24.66%;background:var(--st-noanswer);" title="Called, nobody connected: 36"></div><div style="width:51.37%;background:var(--st-pending);" title="No call made: 75"></div></div></td><td class="num strong">21.7%<span class="cp">10 of 46</span></td></tr>
+            <tr class="total"><td class="date">All three</td><td class="num">449</td><td class="num">32<span class="cp">7.1%</span></td><td class="num">53<span class="cp">11.8%</span></td><td class="num">29<span class="cp">6.5%</span></td><td class="num">149<span class="cp">33.2%</span></td><td class="num">186<span class="cp">41.4%</span></td><td><div class="stk"><div style="width:7.13%;background:var(--st-connected);" title="Both connected: 32"></div><div style="width:11.8%;background:var(--accent);" title="CSP only: 53"></div><div style="width:6.46%;background:var(--st-progress);" title="CX only: 29"></div><div style="width:33.18%;background:var(--st-noanswer);" title="Called, nobody connected: 149"></div><div style="width:41.43%;background:var(--st-pending);" title="No call made: 186"></div></div></td><td class="num strong">17.6%<span class="cp">32 of 182</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="r-note">"Both connected" = the CSP call and the customer call both ended as Spoke. The right-hand % only looks at cases where both legs were actually dialled, so a case where the customer call was not required does not drag it down.</div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head">
+        <div><h2>Reactive · Call type wise</h2><p>Delay (CSP has job), Delay (no CSP), Cancel and Couldn't reach CSP: how many cases each agent took and how the calls went.</p></div>
+        
+      </div>
+      <div class="panel-body">
+        <div class="tbl-scroll">
+          <table class="trend-table">
+            <thead><tr><th>Call type</th><th class="num">Cases</th><th class="num">Kriti</th><th class="num">Nitin</th><th class="num">Pintoo</th><th class="num">CSP connect %</th><th class="num">CX connect %</th><th class="num">Both connected %</th><th class="num">Resolved %</th></tr></thead>
+            <tbody>
+            <tr><td class="date">Delay – CSP has job</td><td class="num">229</td><td class="num">58</td><td class="num">90</td><td class="num">81</td><td class="num">40.3%</td><td class="num">37.3%</td><td class="num">21.7%</td><td class="num">28.8%</td></tr>
+            <tr><td class="date">Delay – no CSP</td><td class="num">135</td><td class="num">33</td><td class="num">67</td><td class="num">35</td><td class="num">12.7%</td><td class="num">13.2%</td><td class="num">7.8%</td><td class="num">0.7%</td></tr>
+            <tr><td class="date">Cancel</td><td class="num">70</td><td class="num">24</td><td class="num">20</td><td class="num">26</td><td class="num">35.9%</td><td class="num">32.5%</td><td class="num">18.2%</td><td class="num">8.6%</td></tr>
+            <tr><td class="date">Couldn't reach CSP</td><td class="num">15</td><td class="num">7</td><td class="num">4</td><td class="num">4</td><td class="num">72.7%</td><td class="num">50%</td><td class="num">33.3%</td><td class="num">46.7%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div class="block-label">Connect % by call type and agent (of calls made)</div>
+          <div class="tbl-scroll">
+            <table class="trend-table">
+              <thead><tr><th>Call type</th><th class="num">Kriti</th><th class="num">Nitin</th><th class="num">Pintoo</th></tr></thead>
+              <tbody>
+            <tr><td class="date">Delay – CSP has job</td><td class="num">CSP 45.5% · CX 33.3%<span class="cp">both 33.3% · n=58</span></td><td class="num">CSP 42.1% · CX 40%<span class="cp">both 23.6% · n=90</span></td><td class="num">CSP 31.6% · CX 34.1%<span class="cp">both 16.1% · n=81</span></td></tr>
+            <tr><td class="date">Delay – no CSP</td><td class="num">CSP 50% · CX 100%<span class="cp">both 75% · n=33</span></td><td class="num">CSP 2.2% · CX 2.2%<span class="cp">both 0% · n=67</span></td><td class="num">CSP 100% · CX 50%<span class="cp">both 50% · n=35</span></td></tr>
+            <tr><td class="date">Cancel</td><td class="num">CSP 35.7% · CX 44.4%<span class="cp">both 25% · n=24</span></td><td class="num">CSP 28.6% · CX 14.3%<span class="cp">both 7.1% · n=20</span></td><td class="num">CSP 45.5% · CX 41.2%<span class="cp">both 27.3% · n=26</span></td></tr>
+            <tr><td class="date">Couldn't reach CSP</td><td class="num">CSP 100% · CX 0%<span class="cp">both 0% · n=7</span></td><td class="num">CSP 50% · CX 33.3%<span class="cp">both 33.3% · n=4</span></td><td class="num">CSP 50% · CX 100%<span class="cp">both 50% · n=4</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head">
+        <div><h2>Reactive · Current status of leads</h2><p>Where each agent's cases stand right now, from the sheet's Status column. The last row shows the cases with no agent name, for context.</p></div>
+        
+      </div>
+      <div class="panel-body">
+        <div class="split-legend"><div class="item"><span class="sw" style="background:var(--st-progress);"></span>Open</div><div class="item"><span class="sw" style="background:var(--st-pending);"></span>Overdue: close it now</div><div class="item"><span class="sw" style="background:var(--st-connected);"></span>Resolved: installed</div><div class="item"><span class="sw" style="background:var(--accent);"></span>Resolved: date / time fixed</div><div class="item"><span class="sw" style="background:var(--st-noanswer);"></span>Closed: customer cancelled</div><div class="item"><span class="sw" style="background:var(--st-hold);"></span>Closed: CSP gave up</div><div class="item"><span class="sw" style="background:var(--muted);"></span>Closed: not reachable</div><div class="item"><span class="sw" style="background:var(--surface-3);"></span>Closed: other</div></div>
+        <div class="tbl-scroll">
+          <table class="trend-table">
+            <thead><tr><th>Agent</th><th class="num">Cases</th><th class="num">Open</th><th class="num">Overdue: close it now</th><th class="num">Resolved: installed</th><th class="num">Resolved: date / time fixed</th><th class="num">Closed: customer cancelled</th><th class="num">Closed: CSP gave up</th><th class="num">Closed: not reachable</th><th class="num">Closed: other</th><th>Mix</th></tr></thead>
+            <tbody>
+            <tr><td class="date">Kriti</td><td class="num">122</td><td class="num">42<span class="cp">34.4%</span></td><td class="num">7<span class="cp">5.7%</span></td><td class="num">16<span class="cp">13.1%</span></td><td class="num">4<span class="cp">3.3%</span></td><td class="num">12<span class="cp">9.8%</span></td><td class="num">35<span class="cp">28.7%</span></td><td class="num">5<span class="cp">4.1%</span></td><td class="num">1<span class="cp">0.8%</span></td><td><div class="stk"><div style="width:34.43%;background:var(--st-progress);" title="Open: 42"></div><div style="width:5.74%;background:var(--st-pending);" title="Overdue: close it now: 7"></div><div style="width:13.11%;background:var(--st-connected);" title="Resolved: installed: 16"></div><div style="width:3.28%;background:var(--accent);" title="Resolved: date / time fixed: 4"></div><div style="width:9.84%;background:var(--st-noanswer);" title="Closed: customer cancelled: 12"></div><div style="width:28.69%;background:var(--st-hold);" title="Closed: CSP gave up: 35"></div><div style="width:4.1%;background:var(--muted);" title="Closed: not reachable: 5"></div><div style="width:0.82%;background:var(--surface-3);" title="Closed: other: 1"></div></div></td></tr>
+            <tr><td class="date">Nitin</td><td class="num">181</td><td class="num">37<span class="cp">20.4%</span></td><td class="num">1<span class="cp">0.6%</span></td><td class="num">29<span class="cp">16%</span></td><td class="num">3<span class="cp">1.7%</span></td><td class="num">20<span class="cp">11%</span></td><td class="num">20<span class="cp">11%</span></td><td class="num">71<span class="cp">39.2%</span></td><td class="num">0<span class="cp">0%</span></td><td><div class="stk"><div style="width:20.44%;background:var(--st-progress);" title="Open: 37"></div><div style="width:0.55%;background:var(--st-pending);" title="Overdue: close it now: 1"></div><div style="width:16.02%;background:var(--st-connected);" title="Resolved: installed: 29"></div><div style="width:1.66%;background:var(--accent);" title="Resolved: date / time fixed: 3"></div><div style="width:11.05%;background:var(--st-noanswer);" title="Closed: customer cancelled: 20"></div><div style="width:11.05%;background:var(--st-hold);" title="Closed: CSP gave up: 20"></div><div style="width:39.23%;background:var(--muted);" title="Closed: not reachable: 71"></div></div></td></tr>
+            <tr><td class="date">Pintoo</td><td class="num">146</td><td class="num">53<span class="cp">36.3%</span></td><td class="num">28<span class="cp">19.2%</span></td><td class="num">22<span class="cp">15.1%</span></td><td class="num">6<span class="cp">4.1%</span></td><td class="num">7<span class="cp">4.8%</span></td><td class="num">25<span class="cp">17.1%</span></td><td class="num">5<span class="cp">3.4%</span></td><td class="num">0<span class="cp">0%</span></td><td><div class="stk"><div style="width:36.3%;background:var(--st-progress);" title="Open: 53"></div><div style="width:19.18%;background:var(--st-pending);" title="Overdue: close it now: 28"></div><div style="width:15.07%;background:var(--st-connected);" title="Resolved: installed: 22"></div><div style="width:4.11%;background:var(--accent);" title="Resolved: date / time fixed: 6"></div><div style="width:4.79%;background:var(--st-noanswer);" title="Closed: customer cancelled: 7"></div><div style="width:17.12%;background:var(--st-hold);" title="Closed: CSP gave up: 25"></div><div style="width:3.42%;background:var(--muted);" title="Closed: not reachable: 5"></div></div></td></tr>
+            <tr class="total"><td class="date">All three</td><td class="num">449</td><td class="num">132<span class="cp">29.4%</span></td><td class="num">36<span class="cp">8%</span></td><td class="num">67<span class="cp">14.9%</span></td><td class="num">13<span class="cp">2.9%</span></td><td class="num">39<span class="cp">8.7%</span></td><td class="num">80<span class="cp">17.8%</span></td><td class="num">81<span class="cp">18%</span></td><td class="num">1<span class="cp">0.2%</span></td><td><div class="stk"><div style="width:29.4%;background:var(--st-progress);" title="Open: 132"></div><div style="width:8.02%;background:var(--st-pending);" title="Overdue: close it now: 36"></div><div style="width:14.92%;background:var(--st-connected);" title="Resolved: installed: 67"></div><div style="width:2.9%;background:var(--accent);" title="Resolved: date / time fixed: 13"></div><div style="width:8.69%;background:var(--st-noanswer);" title="Closed: customer cancelled: 39"></div><div style="width:17.82%;background:var(--st-hold);" title="Closed: CSP gave up: 80"></div><div style="width:18.04%;background:var(--muted);" title="Closed: not reachable: 81"></div><div style="width:0.22%;background:var(--surface-3);" title="Closed: other: 1"></div></div></td></tr>
+            <tr class="thin"><td class="date">No name (context)</td><td class="num">878</td><td class="num">30<span class="cp">3.4%</span></td><td class="num">55<span class="cp">6.3%</span></td><td class="num">246<span class="cp">28%</span></td><td class="num">20<span class="cp">2.3%</span></td><td class="num">240<span class="cp">27.3%</span></td><td class="num">268<span class="cp">30.5%</span></td><td class="num">19<span class="cp">2.2%</span></td><td class="num">0<span class="cp">0%</span></td><td><div class="stk"><div style="width:3.42%;background:var(--st-progress);" title="Open: 30"></div><div style="width:6.26%;background:var(--st-pending);" title="Overdue: close it now: 55"></div><div style="width:28.02%;background:var(--st-connected);" title="Resolved: installed: 246"></div><div style="width:2.28%;background:var(--accent);" title="Resolved: date / time fixed: 20"></div><div style="width:27.33%;background:var(--st-noanswer);" title="Closed: customer cancelled: 240"></div><div style="width:30.52%;background:var(--st-hold);" title="Closed: CSP gave up: 268"></div><div style="width:2.16%;background:var(--muted);" title="Closed: not reachable: 19"></div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div class="block-label">48-hour result (cases whose 48 hours are complete)</div>
+          <div class="split-legend"><div class="item"><span class="sw" style="background:var(--st-connected);"></span>Resolved in 48 h</div><div class="item"><span class="sw" style="background:var(--accent);"></span>Resolved, no call logged</div><div class="item"><span class="sw" style="background:var(--st-hold);"></span>Closed in 48 h, not resolved</div><div class="item"><span class="sw" style="background:var(--st-noanswer);"></span>Not closed in 48 h</div><div class="item"><span class="sw" style="background:var(--surface-3);"></span>Not due yet</div></div>
+          <div class="tbl-scroll">
+            <table class="trend-table">
+              <thead><tr><th>Agent</th><th class="num">Cases</th><th class="num">Resolved in 48 h</th><th class="num">Resolved, no call logged</th><th class="num">Closed in 48 h, not resolved</th><th class="num">Not closed in 48 h</th><th class="num">Not due yet</th><th>Mix</th></tr></thead>
+              <tbody>
+            <tr><td class="date">Kriti</td><td class="num">122</td><td class="num">2<span class="cp">1.6%</span></td><td class="num">1<span class="cp">0.8%</span></td><td class="num">15<span class="cp">12.3%</span></td><td class="num">7<span class="cp">5.7%</span></td><td class="num">97<span class="cp">79.5%</span></td><td><div class="stk"><div style="width:1.64%;background:var(--st-connected);" title="Resolved in 48 h: 2"></div><div style="width:0.82%;background:var(--accent);" title="Resolved, no call logged: 1"></div><div style="width:12.3%;background:var(--st-hold);" title="Closed in 48 h, not resolved: 15"></div><div style="width:5.74%;background:var(--st-noanswer);" title="Not closed in 48 h: 7"></div><div style="width:79.51%;background:var(--surface-3);" title="Not due yet: 97"></div></div></td></tr>
+            <tr><td class="date">Nitin</td><td class="num">181</td><td class="num">12<span class="cp">6.6%</span></td><td class="num">1<span class="cp">0.6%</span></td><td class="num">51<span class="cp">28.2%</span></td><td class="num">11<span class="cp">6.1%</span></td><td class="num">106<span class="cp">58.6%</span></td><td><div class="stk"><div style="width:6.63%;background:var(--st-connected);" title="Resolved in 48 h: 12"></div><div style="width:0.55%;background:var(--accent);" title="Resolved, no call logged: 1"></div><div style="width:28.18%;background:var(--st-hold);" title="Closed in 48 h, not resolved: 51"></div><div style="width:6.08%;background:var(--st-noanswer);" title="Not closed in 48 h: 11"></div><div style="width:58.56%;background:var(--surface-3);" title="Not due yet: 106"></div></div></td></tr>
+            <tr><td class="date">Pintoo</td><td class="num">146</td><td class="num">9<span class="cp">6.2%</span></td><td class="num">0<span class="cp">0%</span></td><td class="num">7<span class="cp">4.8%</span></td><td class="num">40<span class="cp">27.4%</span></td><td class="num">90<span class="cp">61.6%</span></td><td><div class="stk"><div style="width:6.16%;background:var(--st-connected);" title="Resolved in 48 h: 9"></div><div style="width:4.79%;background:var(--st-hold);" title="Closed in 48 h, not resolved: 7"></div><div style="width:27.4%;background:var(--st-noanswer);" title="Not closed in 48 h: 40"></div><div style="width:61.64%;background:var(--surface-3);" title="Not due yet: 90"></div></div></td></tr>
+            <tr class="total"><td class="date">All three</td><td class="num">449</td><td class="num">23<span class="cp">5.1%</span></td><td class="num">2<span class="cp">0.4%</span></td><td class="num">73<span class="cp">16.3%</span></td><td class="num">58<span class="cp">12.9%</span></td><td class="num">293<span class="cp">65.3%</span></td><td><div class="stk"><div style="width:5.12%;background:var(--st-connected);" title="Resolved in 48 h: 23"></div><div style="width:0.45%;background:var(--accent);" title="Resolved, no call logged: 2"></div><div style="width:16.26%;background:var(--st-hold);" title="Closed in 48 h, not resolved: 73"></div><div style="width:12.92%;background:var(--st-noanswer);" title="Not closed in 48 h: 58"></div><div style="width:65.26%;background:var(--surface-3);" title="Not due yet: 293"></div></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="r-note" style="margin-top:10px;">"Not due yet" = the 48 hours since the case came in have not finished, so no result is recorded.</div>
+        </div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head">
+        <div><h2>Reactive · Call tries overall</h2><p>How many dial attempts each agent made, and how many cases needed a second or later try.</p></div>
+        
+      </div>
+      <div class="panel-body">
+        <div class="tbl-scroll">
+          <table class="trend-table">
+            <thead><tr><th>Agent</th><th class="num">Calls made <small>CSP + CX legs</small></th><th class="num">Total tries</th><th class="num">Avg tries per call</th><th class="num">1 try</th><th class="num">2 tries</th><th class="num">3 tries</th><th class="num">4 tries</th><th class="num">5+ tries</th></tr></thead>
+            <tbody>
+            <tr><td class="date">Kriti</td><td class="num">91</td><td class="num">121</td><td class="num strong">1.33</td><td class="num">68<span class="cp">74.7%</span></td><td class="num">19<span class="cp">20.9%</span></td><td class="num">2<span class="cp">2.2%</span></td><td class="num">1<span class="cp">1.1%</span></td><td class="num">1<span class="cp">1.1%</span></td></tr>
+            <tr><td class="date">Nitin</td><td class="num">237</td><td class="num">284</td><td class="num strong">1.2</td><td class="num">214<span class="cp">90.3%</span></td><td class="num">13<span class="cp">5.5%</span></td><td class="num">3<span class="cp">1.3%</span></td><td class="num">0<span class="cp">0%</span></td><td class="num">7<span class="cp">3%</span></td></tr>
+            <tr><td class="date">Pintoo</td><td class="num">117</td><td class="num">145</td><td class="num strong">1.24</td><td class="num">89<span class="cp">76.1%</span></td><td class="num">28<span class="cp">23.9%</span></td><td class="num">0<span class="cp">0%</span></td><td class="num">0<span class="cp">0%</span></td><td class="num">0<span class="cp">0%</span></td></tr>
+            <tr class="total"><td class="date">All three</td><td class="num">445</td><td class="num">550</td><td class="num strong">1.24</td><td class="num">371<span class="cp">83.4%</span></td><td class="num">60<span class="cp">13.5%</span></td><td class="num">5<span class="cp">1.1%</span></td><td class="num">1<span class="cp">0.2%</span></td><td class="num">8<span class="cp">1.8%</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="r-note">One call = one leg (CSP or customer) that has a result of Spoke, No answer, Busy or Wrong number. Tries come from the "Customer tries" and "CSP tries" columns; where a result is logged but the tries box is empty it is counted as 1. Legs marked "not required" are left out. The sheet's results say a customer is only called unreachable after 5 tries.</div>
+        <div>
+          <div class="block-label">Cases by the day they came in</div>
+          <div class="tbl-scroll">
+            <table class="trend-table">
+              <thead><tr><th>Day</th><th class="num">All cases</th><th class="num">Kriti</th><th class="num">Nitin</th><th class="num">Pintoo</th><th class="num">No name</th></tr></thead>
+              <tbody>
+            <tr><td class="date">04 Nov</td><td class="num">30</td><td class="num">0</td><td class="num">8</td><td class="num">9</td><td class="num">13</td></tr>
+            <tr><td class="date">03 Nov</td><td class="num">219</td><td class="num">44</td><td class="num">62</td><td class="num">51</td><td class="num">62</td></tr>
+            <tr><td class="date">02 Nov</td><td class="num">280</td><td class="num">72</td><td class="num">52</td><td class="num">29</td><td class="num">127</td></tr>
+            <tr><td class="date">01 Nov</td><td class="num">307</td><td class="num">6</td><td class="num">53</td><td class="num">26</td><td class="num">222</td></tr>
+            <tr><td class="date">31 Oct</td><td class="num">249</td><td class="num">0</td><td class="num">1</td><td class="num">30</td><td class="num">218</td></tr>
+            <tr><td class="date">30 Oct</td><td class="num">242</td><td class="num">0</td><td class="num">5</td><td class="num">1</td><td class="num">236</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>B2I Escalation Workstream — full pull, filters cleared, 4 Nov 2026 · 791 real leads · practice rows excluded.</footer>
 </div>
 
 <script>
